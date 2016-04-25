@@ -15,10 +15,10 @@
 
 / {
 	model = "Digi CCWMX53 Board";
-	compatible = "digi,imx53-ccxmx53", "fsl,imx53";
+	compatible = "fsl,imx53-ccxmx53", "fsl,imx53";
 
 	memory {
-		reg = <0x70000000 0x40000000>;
+		reg = <0x0 0x0>;	//reg = <0x70000000 0x40000000>;
 	};
 	
 	regulators {
@@ -34,27 +34,70 @@
 			regulator-max-microvolt = <5000000>;
 			gpio = <&gpio1 2 0>;
 		};
-	};
-	
-	eim-cs1@f4000000 {
-		#address-cells = <1>;
-		#size-cells = <1>;
-		compatible = "fsl,eim-bus", "simple-bus";
-		reg = <0xf4000000 0x3ff0000>;
-		ranges;
-
-		lan9220@f4000000 {
-			compatible = "smsc,lan9220", "smsc,lan9115";
-			reg = <0xf4000000 0x2000000>;
-			phy-mode = "mii";
-			interrupt-parent = <&gpio2>;
-			interrupts = <31 0x8>;
-			reg-io-width = <4>;
-			smsc,irq-push-pull;
-			status = "okay";
+		
+		reg_3p3v: regulator@0 {
+			compatible = "regulator-fixed";
+			reg = <0>;
+			regulator-name = "3P3V";
+			regulator-min-microvolt = <3300000>;
+			regulator-max-microvolt = <3300000>;
+			regulator-always-on;
 		};
 	};
 
+};
+
+&weim {
+	pinctrl-names = "default";
+	#address-cells = <2>;
+	#size-cells = <1>;
+	ranges = <0 0 0xf2000000 0x04000000>,
+			 <1 0 0xf4000000 0x04000000>;
+	fsl,weim-cs-gpr = <&gpr>;	
+	status = "okay";
+	
+	lan9221_cs0@0,0 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		pinctrl-names = "default";
+		compatible = "smsc,lan9221", "smsc,lan9115";
+		reg = <0 0x00000000 0x02000000>;
+		fsl,weim-cs-timing = <
+			0x00420081 0x00000000
+			0x32260000 0x00000000
+			0x72080f00 0x00000000
+		>;
+		clocks = <&clks IMX5_CLK_DUMMY>;
+		interrupt-parent = <&gpio4>;
+		interrupts = <2 0x8>;
+		phy-mode = "mii";
+		reg-io-width = <2>;
+		smsc,irq-push-pull;
+		vdd33a-supply = <&reg_3p3v>;
+		vddvario-supply = <&reg_3p3v>;
+		status = "disabled";
+	};
+	
+	lan9221_cs1@0,1 {
+		#address-cells = <1>;
+		#size-cells = <1>;
+		pinctrl-names = "default";
+		compatible = "smsc,lan9221", "smsc,lan9115";
+		reg = <1 0x00000000 0x02000000>;
+		fsl,weim-cs-timing = <
+			0x00420081 0x00000000
+			0x32260000 0x00000000
+			0x72080f00 0x00000000
+		>;
+		clocks = <&clks IMX5_CLK_DUMMY>;
+		interrupt-parent = <&gpio4>;
+		interrupts = <2 0x8>;
+		phy-mode = "mii";
+		reg-io-width = <2>;
+		smsc,irq-push-pull;
+		vdd33a-supply = <&reg_3p3v>;
+		vddvario-supply = <&reg_3p3v>;
+	};
 };
 
 &esdhc2 {
@@ -77,10 +120,39 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_hog>;
 
-	imx53-ard {
+	imx53-digi {
 		pinctrl_hog: hoggrp {
 			fsl,pins = <
-
+				
+				//SMSC LAN9220
+				MX53_PAD_GPIO_12__GPIO4_2            0x000001d5
+				MX53_PAD_EIM_EB3__GPIO2_31			 0x1d5
+				MX53_PAD_EIM_D16__EMI_WEIM_D_16      0x000000A4
+				MX53_PAD_EIM_D17__EMI_WEIM_D_17      0x000000A4
+				MX53_PAD_EIM_D18__EMI_WEIM_D_18      0x000000A4
+				MX53_PAD_EIM_D19__EMI_WEIM_D_19      0x000000A4
+				MX53_PAD_EIM_D20__EMI_WEIM_D_20      0x000000A4
+				MX53_PAD_EIM_D21__EMI_WEIM_D_21      0x000000A4
+				MX53_PAD_EIM_D22__EMI_WEIM_D_22      0x000000A4
+				MX53_PAD_EIM_D23__EMI_WEIM_D_23      0x000000A4
+				MX53_PAD_EIM_D24__EMI_WEIM_D_24      0x000000A4
+				MX53_PAD_EIM_D25__EMI_WEIM_D_25      0x000000A4
+				MX53_PAD_EIM_D26__EMI_WEIM_D_26      0x000000A4
+				MX53_PAD_EIM_D27__EMI_WEIM_D_27      0x000000A4
+				MX53_PAD_EIM_D28__EMI_WEIM_D_28      0x000000A4
+				MX53_PAD_EIM_D29__EMI_WEIM_D_29      0x000000A4
+				MX53_PAD_EIM_D30__EMI_WEIM_D_30      0x000000A4
+				MX53_PAD_EIM_D31__EMI_WEIM_D_31      0x000000A4
+				MX53_PAD_EIM_DA0__EMI_NAND_WEIM_DA_0 0x000000A4
+				MX53_PAD_EIM_DA1__EMI_NAND_WEIM_DA_1 0x000000A4
+				MX53_PAD_EIM_DA2__EMI_NAND_WEIM_DA_2 0x000000A4
+				MX53_PAD_EIM_DA3__EMI_NAND_WEIM_DA_3 0x000000A4
+				MX53_PAD_EIM_DA4__EMI_NAND_WEIM_DA_4 0x000000A4
+				MX53_PAD_EIM_DA5__EMI_NAND_WEIM_DA_5 0x000000A4
+				MX53_PAD_EIM_DA6__EMI_NAND_WEIM_DA_6 0x000000A4
+				MX53_PAD_EIM_OE__EMI_WEIM_OE	     0x000000A4
+				MX53_PAD_EIM_RW__EMI_WEIM_RW	     0x000000A4
+				MX53_PAD_EIM_CS1__EMI_WEIM_CS_1	     0x000000A4
 			>;
 		};
 
